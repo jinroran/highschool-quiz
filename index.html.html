@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나에게 맞는 고등학교 유형 찾기</title>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4ff;
+    --card: #ffffff;
+    --primary: #3b5bdb;
+    --primary-light: #e7edff;
+    --accent: #f03e3e;
+    --text: #1a1a2e;
+    --muted: #6c757d;
+    --border: #dee2e6;
+    --A: #3b5bdb; --A-bg: #e7edff;
+    --B: #0ca678; --B-bg: #d3f9d8;
+    --C: #f76707; --C-bg: #fff3bf;
+    --D: #ae3ec9; --D-bg: #f3d9fa;
+    --E: #f03e3e; --E-bg: #ffe3e3;
+    --shadow: 0 4px 24px rgba(59,91,219,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #3b5bdb 0%, #6741d9 100%);
+    color: white;
+    padding: 36px 24px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .header h1 {
+    font-size: clamp(20px, 5vw, 28px);
+    font-weight: 900;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .header p { font-size: 13px; opacity: 0.85; }
+
+  /* PROGRESS */
+  .progress-wrap {
+    background: white;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .progress-bar-bg {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b5bdb, #6741d9);
+    border-radius: 8px;
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+
+  /* QUIZ CONTAINER */
+  .quiz-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+
+  /* INSTRUCTION */
+  .instruction {
+    background: white;
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--primary);
+    box-shadow: var(--shadow);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .instruction strong { color: var(--primary); }
+
+  /* SCALE LEGEND */
+  .scale-legend {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    background: var(--primary-light);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 12px;
+  }
+  .scale-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+  }
+  .scale-dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white;
+  }
+
+  /* QUESTION CARD */
+  .q-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    border: 2px solid transparent;
+    transition: border-color 0.25s, box-shadow 0.25s;
+    animation: fadeUp 0.4s ease both;
+  }
+  .q-card.answered { border-color: #c5d3ff; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .q-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .q-text {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  .q-options {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .q-options label {
+    flex: 1;
+    min-width: 48px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .q-options input[type="radio"] { display: none; }
+  .opt-btn {
+    width: 100%;
+    padding: 10px 4px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: white;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1.3;
+  }
+  .opt-score { font-size: 16px; font-weight: 900; }
+  .opt-label { font-size: 10px; font-weight: 600; }
+  .q-options input[type="radio"]:checked + .opt-btn {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 2px 10px rgba(59,91,219,0.3);
+    transform: scale(1.05);
+  }
+
+  /* SUBMIT */
+  .submit-wrap {
+    text-align: center;
+    margin-top: 32px;
+  }
+  .btn-submit {
+    background: linear-gradient(135deg, #3b5bdb, #6741d9);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 16px 48px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(59,91,219,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(59,91,219,0.5); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .submit-hint { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+  /* RESULT */
+  #result-section { display: none; }
+  .result-header {
+    text-align: center;
+    padding: 32px 20px 24px;
+  }
+  .result-emoji { font-size: 56px; margin-bottom: 12px; }
+  .result-header h2 { font-size: 22px; font-weight: 900; color: var(--text); }
+  .result-header p { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
+  .result-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .result-card {
+    background: white;
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-left: 5px solid transparent;
+  }
+  .result-rank {
+    font-size: 13px;
+    font-weight: 900;
+    color: white;
+    background: var(--primary);
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .result-rank.r1 { background: #f59f00; width: 38px; height: 38px; font-size: 15px; }
+  .result-rank.r2 { background: #868e96; }
+  .result-rank.r3 { background: #cd7f32; }
+  .result-info { flex: 1; }
+  .result-type-name { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+  .result-type-sub { font-size: 12px; color: var(--muted); }
+  .result-score-wrap { text-align: right; }
+  .result-score-num { font-size: 22px; font-weight: 900; }
+  .result-score-max { font-size: 12px; color: var(--muted); }
+  .result-bar-bg { height: 6px; background: #e9ecef; border-radius: 6px; margin-top: 6px; width: 80px; }
+  .result-bar-fill { height: 100%; border-radius: 6px; }
+
+  /* TYPE INFO */
+  .type-info-box {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .type-info-box h3 { font-size: 15px; font-weight: 800; margin-bottom: 14px; color: var(--text); }
+  .type-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f3f5;
+  }
+  .type-row:last-child { border-bottom: none; }
+  .type-badge {
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    min-width: 70px;
+    text-align: center;
+  }
+  .type-desc { font-size: 13px; line-height: 1.5; color: #444; }
+
+  /* SCORE TABLE */
+  .score-table-wrap {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .score-table-wrap h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .score-label { width: 80px; font-size: 12px; font-weight: 700; }
+  .score-track { flex: 1; height: 10px; background: #f1f3f5; border-radius: 10px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+  .score-val { width: 32px; font-size: 12px; font-weight: 700; text-align: right; }
+
+  /* ACTION BUTTONS */
+  .action-btns {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .btn-action {
+    flex: 1;
+    min-width: 120px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 2px solid var(--primary);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn-action.primary {
+    background: var(--primary);
+    color: white;
+  }
+  .btn-action.secondary {
+    background: white;
+    color: var(--primary);
+  }
+  .btn-action:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+  /* COPY RESULT */
+  .copy-box {
+    background: #f8f9fa;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.8;
+    font-family: monospace;
+    color: var(--text);
+    white-space: pre-wrap;
+    margin-bottom: 16px;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a1a2e;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 9999;
+    transition: transform 0.3s;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* CANVAS for screenshot */
+  #result-canvas { display: none; }
+  
+  .warn-msg {
+    background: #fff3bf;
+    border: 1px solid #fab005;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #664d03;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .warn-msg.show { display: block; }
+
+  /* 출처 */
+  .source-note {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    padding-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">🏫 진로수업 4차시</div>
+  <h1>나에게 맞는<br>고등학교 유형 찾기</h1>
+  <p>각 문항을 읽고 나에게 해당하는 점수를 선택하세요</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="progress-text">0 / 35 문항 완료</span>
+    <span id="progress-pct">0%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-bar"></div>
+  </div>
+</div>
+
+<div class="quiz-container" id="quiz-section">
+
+  <div class="instruction">
+    📌 각 문항을 읽고 <strong>나에게 해당하는 정도</strong>를 선택하세요.<br>
+    솔직하게 선택할수록 나에게 맞는 고등학교 유형을 정확히 찾을 수 있어요!
+  </div>
+
+  <div class="scale-legend">
+    <span style="font-weight:700;margin-right:4px;font-size:12px;">점수 기준 →</span>
+    <span class="scale-item"><span class="scale-dot" style="background:#3b5bdb">5</span>매우 그렇다</span>
+    <span class="scale-item"><span class="scale-dot" style="background:#4dabf7">4</span>그렇다</span>
+    <span class="scale-item"><span class="scale-dot" style="background:#74c0fc">3</span>보통</span>
+    <span class="scale-item"><span class="scale-dot" style="background:#adb5bd">2</span>그렇지 않다</span>
+    <span class="scale-item"><span class="scale-dot" style="background:#868e96">1</span>전혀 그렇지 않다</span>
+  </div>
+
+  <div id="questions-wrap"></div>
+
+  <div class="warn-msg" id="warn-msg">⚠️ 아직 선택하지 않은 문항이 있어요. 모든 문항에 답해주세요!</div>
+
+  <div class="submit-wrap">
+    <button class="btn-submit" id="btn-submit" onclick="submitQuiz()">결과 확인하기 →</button>
+    <p class="submit-hint">모든 문항에 체크해야 결과를 확인할 수 있어요</p>
+  </div>
+</div>
+
+<!-- RESULT SECTION -->
+<div class="quiz-container" id="result-section">
+
+  <div class="result-header">
+    <div class="result-emoji" id="res-emoji">🏫</div>
+    <h2 id="res-title">결과를 분석하고 있어요...</h2>
+    <p id="res-subtitle">나에게 맞는 고등학교 유형 순위</p>
+  </div>
+
+  <div class="result-cards" id="result-cards"></div>
+
+  <div class="type-info-box">
+    <h3>📚 고등학교 유형 안내</h3>
+    <div class="type-row">
+      <span class="type-badge" style="background:var(--A-bg);color:var(--A)">일반고 (A)</span>
+      <span class="type-desc">다양한 교과를 균형 있게 배우며 대학 진학을 주로 준비하는 학교</span>
+    </div>
+    <div class="type-row">
+      <span class="type-badge" style="background:var(--B-bg);color:var(--B)">과학·외국어고 (B)</span>
+      <span class="type-desc">과학·수학 또는 외국어 분야의 특화 교육을 받는 특목고</span>
+    </div>
+    <div class="type-row">
+      <span class="type-badge" style="background:var(--C-bg);color:var(--C)">예술·체육고 (C)</span>
+      <span class="type-desc">예술적 재능과 신체 능력을 전문적으로 발전시키는 학교</span>
+    </div>
+    <div class="type-row">
+      <span class="type-badge" style="background:var(--D-bg);color:var(--D)">직업·마이스터고 (D)</span>
+      <span class="type-desc">특정 분야의 직업 기술을 직접 배우고 현장 경험을 쌓는 학교</span>
+    </div>
+    <div class="type-row">
+      <span class="type-badge" style="background:var(--E-bg);color:var(--E)">특성화고(대안) (E)</span>
+      <span class="type-desc">자기주도적 학습과 다양한 체험 중심의 대안 교육을 제공하는 학교</span>
+    </div>
+  </div>
+
+  <div class="score-table-wrap">
+    <h3>📊 유형별 점수 분포</h3>
+    <div id="score-bars"></div>
+  </div>
+
+  <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--muted)">📋 포트폴리오용 결과 복사</h3>
+  <div class="copy-box" id="copy-box"></div>
+
+  <div class="action-btns">
+    <button class="btn-action primary" onclick="copyResult()">📋 결과 텍스트 복사</button>
+    <button class="btn-action secondary" onclick="saveAsImage()">🖼️ 이미지로 저장</button>
+    <button class="btn-action secondary" onclick="resetQuiz()">🔄 다시 하기</button>
+  </div>
+
+  <div class="source-note">출처: 진로전환기 진로학업설계 길라잡이 (경상남도교육청)</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ====== DATA ======
+// 원본 A~E 유형별 문항, 섞어서 제시
+const RAW = {
+  A: [
+    "특별히 한 분야에 집중하기보다 여러 과목을 고루 배우는 게 좋다.",
+    "현재 사는 지역에 있는 학교를 다니고 싶다.",
+    "졸업 후 대학에서 더 깊이 공부하며 진로를 준비하고 싶다.",
+    "국어, 수학, 영어, 사회, 과학처럼 다양한 교과목을 두루 배우는 게 좋다.",
+    "균형 잡힌 학습을 하고 싶다.",
+    "한 분야에 깊이 파고들기보다 다양한 것을 두루두루 배우고 경험하는 게 더 좋다.",
+    "특별한 특기가 없어도 성실하게 공부하며 내 진로를 찾아갈 수 있다고 생각한다.",
+  ],
+  B: [
+    "왜 그럴까? 하는 의문이 생기면 끝까지 파고드는 편이다.",
+    "가설을 세우고 실험으로 확인하는 과정이 재미있다.",
+    "외국어로 된 콘텐츠를 찾아보거나 외국인과 소통하는 것에 관심이 있다.",
+    "관심 분야를 전문적으로 연구하거나 학문적으로 깊이 파고들고 싶다.",
+    "나의 꿈을 이루려면 전문적인 고급 지식과 학력이 필요하다고 생각한다.",
+    "숏츠나 SNS에서 과학·기술 또는 세계 이슈 관련 콘텐츠가 나오면 끝까지 보게 된다.",
+    "어렵더라도 도전적인 지적 활동에 참여하고 싶다."
+  ],
+  C: [
+    "나는 내가 하고 싶은 게 분명하다.",
+    "스포츠나 신체 활동에서 남들보다 빠르게 실력이 느는 편이다.",
+    "음악을 듣거나 춤·동작을 보면 금방 따라 할 수 있다.",
+    "또래와 견주어 섬세하고 미세한 감각이 있다.",
+    "그림, 음악, 춤, 연기 등 예술적인 방식으로 내 감정이나 생각을 표현하는 게 좋다.",
+    "악기 연주, 노래, 그림, 조각 등 예술 활동을 즐겨 한다.",
+    "닮고 싶은 롤 모델이 있다."
+  ],
+  D: [
+    "손재주가 좋다는 말을 들은 적 있다.",
+    "이론을 배우는 것보다 직접 해보면서 익히는 게 더 잘 맞는다.",
+    "졸업 후 바로 현장에서 일하며 경력을 쌓는 것도 좋은 선택이라고 생각한다.",
+    "어떤 기술을 습득하는 일에 관심이 있고 즐긴다.",
+    "다양한 자격증에 관심이 많다.",
+    "내 소질과 적성을 잘 파악하고 있다.",
+    "직업 현장에서 직접 경험하며 배우고 싶다."
+  ],
+  E: [
+    "점수나 등수보다 내가 진짜 관심 있는 것을 배우는 게 더 중요하다.",
+    "학창 시절에 다양한 경험을 해보고 싶다.",
+    "정해진 교과서와 시험 중심의 수업 방식이 나에게는 잘 맞지 않는다.",
+    "체험 활동 위주의 활동을 통해 배우고 싶다.",
+    "텃밭 가꾸기, 숲 체험, 생태 활동처럼 자연 속에서 배우는 활동이 끌린다.",
+    "학업보다는 삶과 진로에 대해 고민이 잦은 편이다.",
+    "고등학교 3년을 입시 준비로만 보내고 싶지 않다."
+  ]
+};
+
+// Shuffle: 타입 정보를 유지하면서 문항 섞기
+function buildQuestions() {
+  let all = [];
+  for (const [type, items] of Object.entries(RAW)) {
+    items.forEach(text => all.push({ type, text }));
+  }
+  // Fisher-Yates shuffle
+  for (let i = all.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [all[i], all[j]] = [all[j], all[i]];
+  }
+  return all;
+}
+
+const QUESTIONS = buildQuestions();
+const TOTAL = QUESTIONS.length;
+
+const TYPE_INFO = {
+  A: { name: "일반고", emoji: "🏫", sub: "균형 잡힌 학습, 대학 진학 중심", color: "#3b5bdb", bg: "#e7edff" },
+  B: { name: "과학고·외국어고", emoji: "🔬", sub: "특화 분야 심화 학습 (특목고)", color: "#0ca678", bg: "#d3f9d8" },
+  C: { name: "예술고·체육고", emoji: "🎨", sub: "예술·체육 특기 전문 계발", color: "#f76707", bg: "#fff3bf" },
+  D: { name: "특성화고·마이스터고", emoji: "🔧", sub: "직업 기술 실습 중심", color: "#ae3ec9", bg: "#f3d9fa" },
+  E: { name: "특성화고(대안)", emoji: "🌿", sub: "자기주도·체험 중심 대안 교육", color: "#f03e3e", bg: "#ffe3e3" },
+};
+
+// ====== RENDER QUESTIONS ======
+function renderQuestions() {
+  const wrap = document.getElementById('questions-wrap');
+  wrap.innerHTML = '';
+  QUESTIONS.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = `card-${i}`;
+    card.style.animationDelay = `${Math.min(i * 0.03, 0.5)}s`;
+    card.innerHTML = `
+      <div class="q-num">문항 ${i + 1}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-options">
+        ${[5,4,3,2,1].map(s => `
+          <label>
+            <input type="radio" name="q${i}" value="${s}" onchange="onAnswer(${i})">
+            <div class="opt-btn">
+              <div class="opt-score">${s}</div>
+              <div class="opt-label">${scoreLabel(s)}</div>
+            </div>
+          </label>
+        `).join('')}
+      </div>
+    `;
+    wrap.appendChild(card);
+  });
+}
+
+function scoreLabel(s) {
+  return { 5:'매우\n그렇다', 4:'그렇다', 3:'보통', 2:'그렇지\n않다', 1:'전혀\n아님' }[s];
+}
+
+let answered = 0;
+function onAnswer(i) {
+  const card = document.getElementById(`card-${i}`);
+  card.classList.add('answered');
+  answered = document.querySelectorAll('input[type="radio"]:checked').length;
+  const pct = Math.round(answered / TOTAL * 100);
+  document.getElementById('progress-text').textContent = `${answered} / ${TOTAL} 문항 완료`;
+  document.getElementById('progress-pct').textContent = `${pct}%`;
+  document.getElementById('prog-bar').style.width = pct + '%';
+}
+
+// ====== SUBMIT ======
+function submitQuiz() {
+  const inputs = document.querySelectorAll('input[type="radio"]:checked');
+  if (inputs.length < TOTAL) {
+    document.getElementById('warn-msg').classList.add('show');
+    // scroll to first unanswered
+    for (let i = 0; i < TOTAL; i++) {
+      const checked = document.querySelector(`input[name="q${i}"]:checked`);
+      if (!checked) {
+        document.getElementById(`card-${i}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document.getElementById(`card-${i}`).style.borderColor = '#f03e3e';
+        break;
+      }
+    }
+    return;
+  }
+
+  // Calculate scores
+  const scores = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+  QUESTIONS.forEach((q, i) => {
+    const val = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+    scores[q.type] += val;
+  });
+
+  showResult(scores);
+}
+
+// ====== RESULT ======
+function showResult(scores) {
+  document.getElementById('quiz-section').style.display = 'none';
+  const rs = document.getElementById('result-section');
+  rs.style.display = 'block';
+
+  // Sort by score
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const top = sorted[0];
+  const info = TYPE_INFO[top[0]];
+
+  document.getElementById('res-emoji').textContent = info.emoji;
+  document.getElementById('res-title').textContent = `나의 1순위: ${info.name}`;
+  document.getElementById('res-subtitle').textContent = info.sub;
+
+  // Result cards
+  const cardsEl = document.getElementById('result-cards');
+  cardsEl.innerHTML = '';
+  sorted.slice(0, 3).forEach(([type, score], i) => {
+    const ti = TYPE_INFO[type];
+    const max = 35;
+    const pct = Math.round(score / max * 100);
+    const rankClass = ['r1','r2','r3'][i];
+    const rankLabel = ['1순위 🥇','2순위 🥈','3순위 🥉'][i];
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.style.borderLeftColor = ti.color;
+    card.innerHTML = `
+      <div class="result-rank ${rankClass}">${i+1}</div>
+      <div class="result-info">
+        <div class="result-type-name" style="color:${ti.color}">${ti.emoji} ${ti.name}</div>
+        <div class="result-type-sub">${ti.sub}</div>
+        <div class="result-bar-bg" style="margin-top:6px;">
+          <div class="result-bar-fill" style="background:${ti.color};width:${pct}%"></div>
+        </div>
+      </div>
+      <div class="result-score-wrap">
+        <div class="result-score-num" style="color:${ti.color}">${score}</div>
+        <div class="result-score-max">/ 35점</div>
+      </div>
+    `;
+    cardsEl.appendChild(card);
+  });
+
+  // Score bars
+  const barsEl = document.getElementById('score-bars');
+  barsEl.innerHTML = '';
+  sorted.forEach(([type, score]) => {
+    const ti = TYPE_INFO[type];
+    const pct = Math.round(score / 35 * 100);
+    barsEl.innerHTML += `
+      <div class="score-row">
+        <span class="score-label" style="color:${ti.color}">${ti.emoji} ${type === 'D' ? '직업·마이스터' : ti.name.replace('·','/').slice(0,5)}</span>
+        <div class="score-track"><div class="score-fill" style="background:${ti.color};width:${pct}%"></div></div>
+        <span class="score-val" style="color:${ti.color}">${score}점</span>
+      </div>
+    `;
+  });
+
+  // Copy text
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+  const copyText = `[나에게 맞는 고등학교 유형 찾기 결과]
+검사일: ${dateStr}
+
+🥇 1순위: ${TYPE_INFO[sorted[0][0]].name} (${sorted[0][1]}점/35점)
+🥈 2순위: ${TYPE_INFO[sorted[1][0]].name} (${sorted[1][1]}점/35점)  
+🥉 3순위: ${TYPE_INFO[sorted[2][0]].name} (${sorted[2][1]}점/35점)
+
+전체 점수
+${sorted.map(([t,s]) => `- ${TYPE_INFO[t].name}: ${s}점`).join('\n')}
+
+출처: 진로전환기 진로학업설계 길라잡이 (경상남도교육청)`;
+
+  document.getElementById('copy-box').textContent = copyText;
+  window._copyText = copyText;
+  window._scores = scores;
+  window._sorted = sorted;
+
+  rs.scrollIntoView({ behavior: 'smooth' });
+}
+
+function copyResult() {
+  navigator.clipboard.writeText(window._copyText || '').then(() => {
+    showToast('✅ 결과가 클립보드에 복사되었어요!');
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = window._copyText;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('✅ 결과가 복사되었어요!');
+  });
+}
+
+function saveAsImage() {
+  // Canvas-based simple result image
+  const sorted = window._sorted;
+  if (!sorted) return;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 600;
+  canvas.height = 420;
+  const ctx = canvas.getContext('2d');
+
+  // BG
+  const grad = ctx.createLinearGradient(0,0,600,420);
+  grad.addColorStop(0, '#3b5bdb');
+  grad.addColorStop(1, '#6741d9');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,600,420);
+
+  // White card
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  roundRect(ctx, 24, 24, 552, 372, 20);
+  ctx.fill();
+
+  // Title
+  ctx.fillStyle = '#1a1a2e';
+  ctx.font = 'bold 22px "Noto Sans KR", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('나에게 맞는 고등학교 유형 찾기', 300, 72);
+
+  ctx.font = '13px "Noto Sans KR", sans-serif';
+  ctx.fillStyle = '#868e96';
+  const now = new Date();
+  ctx.fillText(`검사일: ${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`, 300, 96);
+
+  // Top 3
+  const colors = [TYPE_INFO[sorted[0][0]].color, TYPE_INFO[sorted[1][0]].color, TYPE_INFO[sorted[2][0]].color];
+  const medals = ['🥇','🥈','🥉'];
+  const labels = ['1순위','2순위','3순위'];
+  sorted.slice(0,3).forEach(([type, score], i) => {
+    const ti = TYPE_INFO[type];
+    const y = 140 + i * 72;
+    // Bar BG
+    ctx.fillStyle = '#f1f3f5';
+    roundRect(ctx, 48, y, 504, 52, 10);
+    ctx.fill();
+    // Bar fill
+    ctx.fillStyle = ti.color + '33';
+    const bw = Math.round(504 * score / 35);
+    roundRect(ctx, 48, y, bw, 52, 10);
+    ctx.fill();
+    // Border
+    ctx.strokeStyle = ti.color;
+    ctx.lineWidth = 2;
+    roundRect(ctx, 48, y, 504, 52, 10);
+    ctx.stroke();
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = ti.color;
+    ctx.font = 'bold 15px "Noto Sans KR", sans-serif';
+    ctx.fillText(`${medals[i]} ${labels[i]}: ${ti.name}`, 64, y + 22);
+    ctx.font = '12px "Noto Sans KR", sans-serif';
+    ctx.fillStyle = '#555';
+    ctx.fillText(ti.sub, 64, y + 40);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = ti.color;
+    ctx.font = 'bold 20px "Noto Sans KR", sans-serif';
+    ctx.fillText(`${score}점`, 540, y + 30);
+  });
+
+  // Footer
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#adb5bd';
+  ctx.font = '11px "Noto Sans KR", sans-serif';
+  ctx.fillText('출처: 진로전환기 진로학업설계 길라잡이 (경상남도교육청)', 300, 370);
+
+  // Download
+  const link = document.createElement('a');
+  link.download = `고교유형검사결과_${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('🖼️ 이미지 저장 완료!');
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+function resetQuiz() {
+  document.getElementById('result-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  document.getElementById('warn-msg').classList.remove('show');
+  answered = 0;
+  document.getElementById('progress-text').textContent = `0 / ${TOTAL} 문항 완료`;
+  document.getElementById('progress-pct').textContent = `0%`;
+  document.getElementById('prog-bar').style.width = '0%';
+  // Re-shuffle
+  const newQ = buildQuestions();
+  QUESTIONS.length = 0;
+  newQ.forEach(q => QUESTIONS.push(q));
+  renderQuestions();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// Init
+renderQuestions();
+</script>
+</body>
+</html>
